@@ -31,10 +31,16 @@ trait LogsActivity
                     return;
                 }
 
+                $properties = $model->attributeValuesToBeLogged($eventName);
+
+                if (empty($properties['attributes']) && empty($properties['old'])) {
+                    return;
+                }
+
                 app(ActivityLogger::class)
-                    ->useLog($logName)
+                    ->useLog($model->getTable())
                     ->performedOn($model)
-                    ->withProperties($model->attributeValuesToBeLogged($eventName))
+                    ->withProperties($properties)
                     ->log($description);
             });
         });

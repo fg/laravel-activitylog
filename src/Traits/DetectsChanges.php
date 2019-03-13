@@ -54,7 +54,7 @@ trait DetectsChanges
     public function shouldLogOnlyDirty(): bool
     {
         if (! isset(static::$logOnlyDirty)) {
-            return false;
+            return (bool) config('laravel-activitylog.default_only_dirty');
         }
 
         return static::$logOnlyDirty;
@@ -126,7 +126,13 @@ trait DetectsChanges
             if (Str::contains($attribute, '.')) {
                 $changes += self::getRelatedModelAttributeValue($model, $attribute);
             } else {
-                $changes += $collection->only($attribute)->toArray();
+
+                if ($attribute === '*') {
+                     $changes += collect($model)->except(array_merge([$model->getKeyName()], parent::attributesToBeIgnored()))->toArray();
+                } else {
+                     $changes += collect($model)->only($attribute)->toArray();
+                 }  
+               
             }
         }
 
